@@ -1,10 +1,45 @@
+import { ConfigModule } from '@nestjs/config'
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
+import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { EnvKeys, JoiValidationSchema } from './config'
+
+import { UsersModule } from './users/users.module'
+import { AuthModule } from './auth/auth.module'
+import { CommonModule } from './common/common.module'
+import { ClientsModule } from './client/clients.module'
+import { SeedModule } from './seed/seed.module';
+import { RolesModule } from './roles/roles.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
-	imports: [],
-	controllers: [AppController],
-	providers: [AppService],
+	imports: [
+		//? Enviroment
+		ConfigModule.forRoot({
+			// envFilePath: '.env',
+			validationSchema: JoiValidationSchema,
+		}),
+
+		//? Config Database
+		TypeOrmModule.forRoot({
+			type: 'postgres',
+			host: process.env[EnvKeys.DbHost],
+			port: +process.env[EnvKeys.DbPort],
+			database: process.env[EnvKeys.DbName],
+			username: process.env[EnvKeys.DbUser],
+			password: process.env[EnvKeys.DbPassword],
+			autoLoadEntities: true,
+			synchronize: true, // Debe ser false para prod, sync modificaciones en db
+		}),
+
+		//? Other modules
+		AuthModule,
+		UsersModule,
+		CommonModule,
+		ClientsModule,
+		SeedModule,
+		RolesModule,
+		CategoriesModule,
+	],
 })
 export class AppModule {}
