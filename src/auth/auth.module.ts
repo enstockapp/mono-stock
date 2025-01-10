@@ -29,7 +29,7 @@ import { AuthController } from './auth.controller'
 			useFactory: (configService: ConfigService) => ({
 				secret: configService.get(EnvKeys.JwtSecret),
 				signOptions: {
-					expiresIn: '100h',
+					expiresIn: '1000h',
 				},
 			}),
 		}),

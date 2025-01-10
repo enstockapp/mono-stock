@@ -15,7 +15,7 @@ import {
 import { Client } from 'src/client'
 import { Role } from 'src/roles/entities/role.entity' //! Keep this import format
 
-import { Status } from '../enums'
+import { UserStatus } from '../enums'
 
 @Entity('users')
 export class User {
@@ -36,10 +36,10 @@ export class User {
 
 	@Column({
 		type: 'enum',
-		enum: Status,
-		default: Status.active,
+		enum: UserStatus,
+		default: UserStatus.active,
 	})
-	status: Status
+	status: UserStatus
 
 	@Column({
 		name: 'is_active',

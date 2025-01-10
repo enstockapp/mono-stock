@@ -1,0 +1,7 @@
+export * from './create/create-product-unique.dto'
+export * from './create/create-product-with-variants.dto'
+export * from './create/item-variants.dto'
+export * from './create/stock.dto'
+export * from './product.dto'
+export * from './products-filtering.dto'
+export * from './update/update-product.dto'

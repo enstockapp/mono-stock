@@ -1,8 +1,9 @@
-import { CreateRoleDto, RoleEnum } from 'src/roles'
 import {
+	CreateRoleDto,
+	RoleEnum,
 	DEFAULT_PERMISSIONS_ADMIN,
 	DEFAULT_PERMISSIONS_USER,
-} from 'src/roles/consts'
+} from 'src/roles'
 
 export const RolesDB: CreateRoleDto[] = [
 	{

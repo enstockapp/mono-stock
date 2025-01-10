@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger'
 import {
 	IsEmail,
 	IsString,
@@ -8,9 +9,11 @@ import {
 import { passwordRegex } from 'src/common'
 
 export class LoginUserDto {
+	@ApiProperty()
 	@IsEmail()
 	email: string
 
+	@ApiProperty()
 	@IsString()
 	@MinLength(6)
 	@MaxLength(50)

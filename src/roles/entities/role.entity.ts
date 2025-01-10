@@ -11,7 +11,7 @@ export class Role implements IRole {
 	@Column('text', { unique: true })
 	name: string
 
-	@Column('text', { select: false })
+	@Column('text')
 	description: string
 
 	@ManyToMany(() => User, user => user.roles)

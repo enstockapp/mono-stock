@@ -1,3 +1,4 @@
+import { Client } from 'src/client'
 import { PermissionEnum, RoleEnum } from 'src/roles'
 
 export interface PublicUser {
@@ -5,7 +6,8 @@ export interface PublicUser {
 	email: string
 	name: string
 	lastname: string
-	// client:
+	clientId: string
+	client?: Client
 	createdAt?: Date
 	updatedAt?: Date
 	roles?: RoleEnum[]

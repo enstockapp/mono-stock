@@ -11,6 +11,8 @@ import { ClientsModule } from './client/clients.module'
 import { SeedModule } from './seed/seed.module';
 import { RolesModule } from './roles/roles.module';
 import { CategoriesModule } from './categories/categories.module';
+import { VariantsModule } from './variants/variants.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
 	imports: [
@@ -40,6 +42,8 @@ import { CategoriesModule } from './categories/categories.module';
 		SeedModule,
 		RolesModule,
 		CategoriesModule,
+		VariantsModule,
+		ProductsModule,
 	],
 })
 export class AppModule {}

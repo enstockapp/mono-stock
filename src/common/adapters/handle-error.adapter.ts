@@ -5,16 +5,6 @@ import {
 	Logger,
 } from '@nestjs/common'
 
-export const ErrorsCodes = {
-	typeormDuplicateKey: '23505', // Duplicate key in db for unique value
-	customNotFound: 'key-not-found',
-}
-
-const ErrorsWithCodeAndDetail = [
-	ErrorsCodes.typeormDuplicateKey,
-	ErrorsCodes.customNotFound,
-]
-
 interface CustomError {
 	code: string | number
 	detail?: string
@@ -23,15 +13,52 @@ interface CustomError {
 	status?: number
 }
 
+const ErrorsCodes = {
+	typeormDuplicateKey: '23505', // Duplicate key in db for unique value
+	typeormNotNullContraint: '23502', // null value in column * of relation * violates not-null constraint
+	customDuplicateKey: 'key-duplicate',
+	customNotFound: 'key-not-found',
+	customValidationError: 'validation-error',
+}
+
+const ErrorsWithCodeAndDetail = [
+	ErrorsCodes.typeormDuplicateKey,
+	ErrorsCodes.typeormNotNullContraint,
+	ErrorsCodes.customDuplicateKey,
+	ErrorsCodes.customNotFound,
+	ErrorsCodes.customValidationError,
+]
+
 @Injectable()
 export class HandleErrorAdapter {
 	/**
 	 * Create Not Found Error for implement in Exceptions
-	 * @param message
+	 * @param {string} message
 	 * @returns CustomError
+	 * @memberof HandleErrorAdapter
 	 */
 	getNotFoundError(message: string): CustomError {
 		return this.getCustomErrorObject(ErrorsCodes.customNotFound, message)
+	}
+
+	/**
+	 * Create Duplicate Key Error for implement in Exceptions
+	 * @param {string} message
+	 * @returns CustomError
+	 * @memberof HandleErrorAdapter
+	 */
+	getDuplicateKeyError(message: string): CustomError {
+		return this.getCustomErrorObject(ErrorsCodes.customDuplicateKey, message)
+	}
+
+	/**
+	 * Create Validation Error for implement in Exceptions
+	 * @param {string} message
+	 * @return {*}  {CustomError}
+	 * @memberof HandleErrorAdapter
+	 */
+	getValidationError(message: string): CustomError {
+		return this.getCustomErrorObject(ErrorsCodes.customValidationError, message)
 	}
 
 	/**
@@ -54,9 +81,9 @@ export class HandleErrorAdapter {
 	 * @param context
 	 */
 	handleDBErrors(error: any, context: string): never {
-		const code = error.code || error.response.code
+		const code = error?.code || error?.response?.code
 		// ! Keep this validation order in message
-		const message = error.detail || error.response.detail || error.message
+		const message = error?.detail || error?.response?.detail || error?.message
 
 		if (ErrorsWithCodeAndDetail.includes(code)) {
 			throw new BadRequestException(this.getCustomErrorObject(code, message))
@@ -64,6 +91,7 @@ export class HandleErrorAdapter {
 
 		const logger = new Logger(context)
 		logger.error(error)
+		console.log({ error })
 
 		throw new InternalServerErrorException('Check server logs')
 	}

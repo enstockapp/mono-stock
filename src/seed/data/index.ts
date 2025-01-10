@@ -1,3 +1,5 @@
+export * from './categories.seed'
+export * from './init-data'
 export * from './permissions.seed'
 export * from './roles.seed'
-export * from './init-data'
+export * from './variants.seed'

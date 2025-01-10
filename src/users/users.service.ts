@@ -71,7 +71,7 @@ export class UsersService {
 	): Promise<User | PublicUser> {
 		const user = await this.userRepository.findOne({
 			where: { id },
-			relations: ['roles', 'roles.permissions'],
+			relations: ['roles', 'roles.permissions', 'client'],
 		})
 		if (user?.isActive) {
 			if (!publicUser) return user
@@ -90,7 +90,7 @@ export class UsersService {
 	async findOneByEmail(email: string): Promise<User> {
 		const user = await this.userRepository.findOne({
 			where: { email },
-			relations: ['roles', 'roles.permissions'],
+			relations: ['roles', 'roles.permissions', 'client'],
 		})
 		if (user?.isActive) return user
 		throw new BadRequestException(
@@ -123,6 +123,7 @@ export class UsersService {
 
 		return {
 			...user,
+			clientId: user.client?.id,
 			roles: this.rolesService.entitiesToEnumArray(roles),
 			permissions: this.permissionsService.entitiesToEnumArray(permissions),
 		}

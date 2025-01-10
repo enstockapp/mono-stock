@@ -10,7 +10,7 @@ export class Permission implements IPermission {
 	@Column('text', { unique: true })
 	name: string
 
-	@Column('text', { select: false })
+	@Column('text', { nullable: true })
 	description: string
 
 	@ManyToMany(() => Role, role => role.permissions)
