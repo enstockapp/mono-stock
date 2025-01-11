@@ -1,5 +1,5 @@
 import { Category } from 'src/categories'
-import { Client } from 'src/client'
+import { Client } from 'src/client/entities/client.entity' //! Keep this import
 import { MeasureUnitType, Status } from 'src/common'
 import {
 	BeforeInsert,

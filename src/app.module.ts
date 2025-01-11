@@ -8,11 +8,12 @@ import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { CommonModule } from './common/common.module'
 import { ClientsModule } from './client/clients.module'
-import { SeedModule } from './seed/seed.module';
-import { RolesModule } from './roles/roles.module';
-import { CategoriesModule } from './categories/categories.module';
-import { VariantsModule } from './variants/variants.module';
-import { ProductsModule } from './products/products.module';
+import { SeedModule } from './seed/seed.module'
+import { RolesModule } from './roles/roles.module'
+import { CategoriesModule } from './categories/categories.module'
+import { VariantsModule } from './variants/variants.module'
+import { ProductsModule } from './products/products.module'
+import { SuppliersModule } from './suppliers/suppliers.module'
 
 @Module({
 	imports: [
@@ -44,6 +45,7 @@ import { ProductsModule } from './products/products.module';
 		CategoriesModule,
 		VariantsModule,
 		ProductsModule,
+		SuppliersModule,
 	],
 })
 export class AppModule {}

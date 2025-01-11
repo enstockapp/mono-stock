@@ -50,7 +50,7 @@ export class CategoriesService {
 			await this.categoriesRepository.save(category)
 
 			// Delete client info
-			return this.getPlainCategory(category)
+			return this.getPlainEntity(category)
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -77,9 +77,10 @@ export class CategoriesService {
 				.where('client_id = :clientId', { clientId: client.id })
 				.limit(limit)
 				.offset(offset)
+				.orderBy(`${this.queryBuilderAlias}.name`, 'ASC')
 				.getMany()
 
-			return { page, size, items: categories }
+			return { page, size, items: categories, total: categories.length }
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -166,7 +167,7 @@ export class CategoriesService {
 			// Release Query Runner
 			await queryRunner.release()
 
-			return this.getPlainCategory(category)
+			return this.getPlainEntity(category)
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -196,7 +197,7 @@ export class CategoriesService {
 	 * @return {*}  {Category}
 	 * @memberof CategoriesService
 	 */
-	private getPlainCategory(category: Category): Category {
+	private getPlainEntity(category: Category): Category {
 		category.clientId = category.client?.id
 		delete category.client
 		return category

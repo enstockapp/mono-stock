@@ -1,4 +1,4 @@
-import { Client } from 'src/client'
+import { Client } from 'src/client/entities/client.entity' //! Keep this import
 import {
 	BeforeInsert,
 	BeforeUpdate,

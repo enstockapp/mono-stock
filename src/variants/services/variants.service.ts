@@ -293,7 +293,6 @@ export class VariantsService {
 				)
 
 			//? Note:  Variant Options has onDelete: 'CASCADE'
-			// TODO: Do logic delete
 			await this.variantsRepository.remove(variant)
 			return variant
 		} catch (error) {

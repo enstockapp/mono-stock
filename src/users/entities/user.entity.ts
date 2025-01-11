@@ -12,7 +12,7 @@ import {
 	UpdateDateColumn,
 } from 'typeorm'
 
-import { Client } from 'src/client'
+import { Client } from 'src/client/entities/client.entity' //! Keep this import
 import { Role } from 'src/roles/entities/role.entity' //! Keep this import format
 
 import { UserStatus } from '../enums'
