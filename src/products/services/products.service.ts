@@ -225,7 +225,7 @@ export class ProductsService {
 					},
 				]
 
-		const products = await this.productsRepository.find({
+		const [products, total] = await this.productsRepository.findAndCount({
 			where,
 			relations: {
 				variants: { variant: { variantOptions: true } },
@@ -240,7 +240,7 @@ export class ProductsService {
 		return {
 			page,
 			size,
-			total: products.length,
+			total,
 			items: products,
 		}
 	}

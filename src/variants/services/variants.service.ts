@@ -4,7 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm'
 
 import {
 	areAllStringsDifferent,
+	getPagination,
 	HandleErrorAdapter,
+	PaginatedResponse,
 	PaginationDto,
 	WhereQueryBuilder,
 } from 'src/common'
@@ -92,17 +94,22 @@ export class VariantsService {
 	async findAll(
 		paginationDto: PaginationDto,
 		client: Client,
-	): Promise<VariantSummary[]> {
-		const { size: limit = 10, page: offset = 0 } = paginationDto
+	): Promise<PaginatedResponse> {
+		const { limit, offset, page, size } = getPagination(paginationDto)
 		try {
-			const variants = await this.variantsRepository.find({
+			const [variants, total] = await this.variantsRepository.findAndCount({
 				where: { client: { id: client.id } },
 				relations: ['variantOptions'],
 				take: limit,
 				skip: offset,
 			})
 
-			return variants.map(variant => this.transformToSummary(variant))
+			return {
+				page,
+				size,
+				total,
+				items: variants.map(variant => this.transformToSummary(variant)),
+			}
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -306,7 +313,7 @@ export class VariantsService {
 	): Promise<VariantSummary[]> {
 		try {
 			//? Get variants with options for the client
-			const variants = await this.findAll({ size: 1000 }, client)
+			const { items: variants } = await this.findAll({ size: 1000 }, client)
 
 			//? Validate variants is not empty
 			if (variants.length <= 0)
@@ -430,7 +437,7 @@ export class VariantsService {
 	}
 
 	async getValidOptionIdsForClient(client: Client): Promise<number[]> {
-		const variants = await this.findAll({ size: 1000 }, client)
+		const { items: variants } = await this.findAll({ size: 1000 }, client)
 		const validOptionIds = variants
 			.flatMap(variant => variant.variantOptions)
 			.map(option => option.id)

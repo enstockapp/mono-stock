@@ -73,14 +73,14 @@ export class CategoriesService {
 				this.queryBuilderAlias,
 			)
 
-			const categories = await queryBuilder
+			const [categories, total] = await queryBuilder
 				.where('client_id = :clientId', { clientId: client.id })
 				.limit(limit)
 				.offset(offset)
 				.orderBy(`${this.queryBuilderAlias}.name`, 'ASC')
-				.getMany()
+				.getManyAndCount()
 
-			return { page, size, items: categories, total: categories.length }
+			return { page, size, items: categories, total }
 		} catch (error) {
 			this.handleDBError(error)
 		}

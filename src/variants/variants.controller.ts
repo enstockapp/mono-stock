@@ -13,7 +13,7 @@ import {
 import { Auth, GetUser } from 'src/auth'
 import { Client } from 'src/client'
 import { RoleEnum } from 'src/roles'
-import { PaginationDto } from 'src/common'
+import { PaginatedResponse, PaginationDto } from 'src/common'
 
 import { VariantsService } from './services'
 import { CreateVariantDto, UpdateVariantDto } from './dtos'
@@ -43,7 +43,7 @@ export class VariantsController {
 	 * Find all VariantSummary by client
 	 * @param {PaginationDto} paginationDto
 	 * @param {Client} client
-	 * @return {*}  {Promise<VariantSummary[]>}
+	 * @return {*}  {Promise<PaginatedResponse>}
 	 * @memberof VariantsController
 	 */
 	@Get()
@@ -51,7 +51,7 @@ export class VariantsController {
 	findAll(
 		@Query() paginationDto: PaginationDto,
 		@GetUser('client') client: Client,
-	): Promise<VariantSummary[]> {
+	): Promise<PaginatedResponse> {
 		return this.variantsService.findAll(paginationDto, client)
 	}
 
