@@ -37,8 +37,10 @@ export class HandleErrorAdapter {
 	 * @returns CustomError
 	 * @memberof HandleErrorAdapter
 	 */
-	getNotFoundError(message: string): CustomError {
-		return this.getCustomErrorObject(ErrorsCodes.customNotFound, message)
+	throwBadRequestNotFoundError(message: string): never {
+		throw new BadRequestException(
+			this._getCustomErrorObject(ErrorsCodes.customNotFound, message),
+		)
 	}
 
 	/**
@@ -47,8 +49,10 @@ export class HandleErrorAdapter {
 	 * @returns CustomError
 	 * @memberof HandleErrorAdapter
 	 */
-	getDuplicateKeyError(message: string): CustomError {
-		return this.getCustomErrorObject(ErrorsCodes.customDuplicateKey, message)
+	throwBadRequestDuplicateKeyError(message: string): never {
+		throw new BadRequestException(
+			this._getCustomErrorObject(ErrorsCodes.customDuplicateKey, message),
+		)
 	}
 
 	/**
@@ -57,8 +61,10 @@ export class HandleErrorAdapter {
 	 * @return {*}  {CustomError}
 	 * @memberof HandleErrorAdapter
 	 */
-	getValidationError(message: string): CustomError {
-		return this.getCustomErrorObject(ErrorsCodes.customValidationError, message)
+	throwBadRequestValidationError(message: string): never {
+		throw new BadRequestException(
+			this._getCustomErrorObject(ErrorsCodes.customValidationError, message),
+		)
 	}
 
 	/**
@@ -67,7 +73,7 @@ export class HandleErrorAdapter {
 	 * @param detail
 	 * @returns CustomError
 	 */
-	getCustomErrorObject(
+	private _getCustomErrorObject(
 		code: string,
 		message: string,
 		status = 400,
@@ -86,7 +92,7 @@ export class HandleErrorAdapter {
 		const message = error?.detail || error?.response?.detail || error?.message
 
 		if (ErrorsWithCodeAndDetail.includes(code)) {
-			throw new BadRequestException(this.getCustomErrorObject(code, message))
+			throw new BadRequestException(this._getCustomErrorObject(code, message))
 		}
 
 		const logger = new Logger(context)

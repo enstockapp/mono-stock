@@ -1,5 +1,5 @@
 import { In, Repository } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { EntityAction, HandleErrorAdapter } from 'src/common'
@@ -76,10 +76,8 @@ export class PurchaseItemsService {
 		})
 		if (purchaseItems.length > 0) return purchaseItems
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`PurchaseItems with purchaseId '${purchaseId}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`PurchaseItems with purchaseId '${purchaseId}' not found`,
 		)
 	}
 
@@ -89,10 +87,8 @@ export class PurchaseItemsService {
 			relations: { productStock: { product: true } },
 		})
 		if (ids.length != purchaseItems.length)
-			throw new BadRequestException(
-				this.errorAdapter.getNotFoundError(
-					`Some PurchaseItems ids were not found. NotFoundCount: (${ids.length - purchaseItems.length})`,
-				),
+			this.errorAdapter.throwBadRequestNotFoundError(
+				`Some PurchaseItems ids were not found. NotFoundCount: (${ids.length - purchaseItems.length})`,
 			)
 		return purchaseItems
 	}
@@ -183,10 +179,8 @@ export class PurchaseItemsService {
 			)
 
 			if (productStocksFiltered.length <= 0)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`[getPurchaseItemsWithStock] ProductStock with id '${purchaseItemDto.productStockId}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`[getPurchaseItemsWithStock] ProductStock with id '${purchaseItemDto.productStockId}' not found`,
 				)
 
 			const purchaseItemWithStock: PurchaseItemWithStock = {

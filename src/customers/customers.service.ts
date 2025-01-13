@@ -1,5 +1,5 @@
 import { Repository, DataSource } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import {
@@ -93,10 +93,8 @@ export class CustomersService {
 
 		if (customer) return customer
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Customer with id/name '${term}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Customer with id/name '${term}' not found`,
 		)
 	}
 
@@ -118,10 +116,8 @@ export class CustomersService {
 			})
 
 			if (!customer)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Customer with id '${id}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Customer with id '${id}' not found`,
 				)
 
 			// Create Query Runner
@@ -186,10 +182,8 @@ export class CustomersService {
 		const isValidName = await this.isValidName(name, client)
 
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist a category with name '${name}'`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist a category with name '${name}'`,
 			)
 	}
 

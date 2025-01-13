@@ -1,5 +1,5 @@
 import { DataSource, DeepPartial, ILike, Repository } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import {
@@ -125,10 +125,8 @@ export class ProductsService {
 				getUniqueArraysNumbersArray(allOptionCombination)
 
 			if (allOptionCombination.length !== uniqueOptionCombination.length)
-				throw new BadRequestException(
-					this.errorAdapter.getValidationError(
-						`One or more optionCombinations are identical`,
-					),
+				this.errorAdapter.throwBadRequestValidationError(
+					`One or more optionCombinations are identical`,
 				)
 
 			// Validate variants and options combinacions for the product
@@ -272,10 +270,8 @@ export class ProductsService {
 
 		if (product) return product
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Product with id/name '${term}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Product with id/name '${term}' not found`,
 		)
 	}
 
@@ -376,10 +372,8 @@ export class ProductsService {
 			})
 
 			if (!product)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Product with id '${id}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Product with id '${id}' not found`,
 				)
 
 			// Create Query Runner
@@ -469,10 +463,8 @@ export class ProductsService {
 		const isValidName = await this.isValidName(name, client)
 
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist a product with name '${name}'`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist a product with name '${name}'`,
 			)
 	}
 

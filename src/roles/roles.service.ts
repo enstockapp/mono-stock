@@ -1,6 +1,6 @@
 import { DeleteResult, In, Repository } from 'typeorm'
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { HandleErrorAdapter } from 'src/common'
@@ -79,8 +79,8 @@ export class RolesService {
 	async findOneById(id: number): Promise<Role> {
 		const role = await this.rolesRepository.findOneBy({ id })
 		if (role) return role
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(`Role with id '${id}' not found`),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Role with id '${id}' not found`,
 		)
 	}
 

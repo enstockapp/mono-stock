@@ -1,5 +1,5 @@
 import { ILike, Repository } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import {
@@ -157,8 +157,8 @@ export class PurchasesService {
 
 		if (purchase) return purchase
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(`Purchase with id '${id}' not found`),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Purchase with id '${id}' not found`,
 		)
 	}
 
@@ -209,18 +209,14 @@ export class PurchasesService {
 
 		// Validate there are not null values
 		if (!currencyExchangeFrom || !currencyExchangeTo || !exchangeRate)
-			throw new BadRequestException(
-				this.errorAdapter.getValidationError(
-					`The variables currencyExchangeFrom, currencyExchangeTo and exchangeRate are required`,
-				),
+			this.errorAdapter.throwBadRequestValidationError(
+				`The variables currencyExchangeFrom, currencyExchangeTo and exchangeRate are required`,
 			)
 
 		// Validate are different variables
 		if (currencyExchangeFrom === currencyExchangeTo) {
-			throw new BadRequestException(
-				this.errorAdapter.getValidationError(
-					`The variables currencyExchangeFrom and currencyExchangeTo must be differents`,
-				),
+			this.errorAdapter.throwBadRequestValidationError(
+				`The variables currencyExchangeFrom and currencyExchangeTo must be differents`,
 			)
 		}
 
@@ -230,10 +226,8 @@ export class PurchasesService {
 			!currencies.includes(currencyExchangeFrom) ||
 			!currencies.includes(currencyExchangeTo)
 		)
-			throw new BadRequestException(
-				this.errorAdapter.getValidationError(
-					`The variables currencyExchangeFrom and currencyExchangeTo must be: ${currencies.join('or ')}`,
-				),
+			this.errorAdapter.throwBadRequestValidationError(
+				`The variables currencyExchangeFrom and currencyExchangeTo must be: ${currencies.join('or ')}`,
 			)
 
 		return { currencyExchangeFrom, currencyExchangeTo, exchangeRate }

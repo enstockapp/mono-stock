@@ -1,6 +1,6 @@
 import { DeleteResult, In, Repository } from 'typeorm'
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { HandleErrorAdapter } from 'src/common'
@@ -69,10 +69,9 @@ export class PermissionsService {
 	async findOneById(id: number): Promise<Permission> {
 		const permission = await this.permissionsRepository.findOneBy({ id })
 		if (permission) return permission
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Permission with id '${id}' not found`,
-			),
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Permission with id '${id}' not found`,
 		)
 	}
 

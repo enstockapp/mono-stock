@@ -1,5 +1,5 @@
 import { Repository, In, DataSource, DeepPartial } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { HandleErrorAdapter, Status, Variation } from 'src/common'
@@ -149,10 +149,8 @@ export class ProductStocksService {
 			},
 		})
 		if (ids.length != productStocks.length)
-			throw new BadRequestException(
-				this.errorAdapter.getNotFoundError(
-					`Some ProductStock ids were not found. NotFoundCount: (${ids.length - productStocks.length})`,
-				),
+			this.errorAdapter.throwBadRequestNotFoundError(
+				`Some ProductStock ids were not found. NotFoundCount: (${ids.length - productStocks.length})`,
 			)
 		return productStocks
 	}
@@ -197,10 +195,8 @@ export class ProductStocksService {
 			})
 
 			if (!productStock)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`ProductStock with id '${id}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`ProductStock with id '${id}' not found`,
 				)
 
 			// Create Query Runner
@@ -237,10 +233,8 @@ export class ProductStocksService {
 		)
 
 		if (productStocksFiltered.length > 0)
-			throw new BadRequestException(
-				this.errorAdapter.getNotFoundError(
-					`Some ProductStock ids are not valid. NotValidCount: (${productStocksFiltered.length})`,
-				),
+			this.errorAdapter.throwBadRequestNotFoundError(
+				`Some ProductStock ids are not valid. NotValidCount: (${productStocksFiltered.length})`,
 			)
 
 		return productStocks

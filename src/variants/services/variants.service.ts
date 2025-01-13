@@ -1,5 +1,5 @@
 import { DataSource, DeepPartial, Repository } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import {
@@ -51,10 +51,8 @@ export class VariantsService {
 			const allNamesAreDifferents = areAllStringsDifferent(options)
 
 			if (!allNamesAreDifferents)
-				throw new BadRequestException(
-					this.errorAdapter.getValidationError(
-						'All options names must be differents',
-					),
+				this.errorAdapter.throwBadRequestValidationError(
+					'All options names must be differents',
 				)
 
 			// Create variant
@@ -149,10 +147,8 @@ export class VariantsService {
 
 		if (variant) return this.transformToSummary(variant)
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Variant with id/name '${term}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Variant with id/name '${term}' not found`,
 		)
 	}
 
@@ -177,10 +173,8 @@ export class VariantsService {
 			const currentVariant = await this.findOne(id.toString(), client)
 
 			if (!currentVariant.canEdit)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Variant with id '${id}' cannot be modified`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Variant with id '${id}' cannot be modified`,
 				)
 
 			// Verify if exist a variant with the same name
@@ -263,8 +257,8 @@ export class VariantsService {
 		const variant = await this.variantsRepository.preload({ ...entityLike, id })
 
 		if (!variant)
-			throw new BadRequestException(
-				this.errorAdapter.getNotFoundError(`Variant with id '${id}' not found`),
+			this.errorAdapter.throwBadRequestNotFoundError(
+				`Variant with id '${id}' not found`,
 			)
 
 		// Create Query Runner
@@ -293,10 +287,8 @@ export class VariantsService {
 		try {
 			const variant = (await this.findOne(id.toString(), client)) as Variant
 			if (!variant.canEdit)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Variant with id '${id}' cannot be modified`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Variant with id '${id}' cannot be modified`,
 				)
 
 			//? Note:  Variant Options has onDelete: 'CASCADE'
@@ -317,10 +309,8 @@ export class VariantsService {
 
 			//? Validate variants is not empty
 			if (variants.length <= 0)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`The client has no variants configured`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`The client has no variants configured`,
 				)
 
 			//? Validate options exist for client
@@ -332,10 +322,8 @@ export class VariantsService {
 
 			for (const optionId of allOptionsIdsSet) {
 				if (!validOptionsIds.includes(optionId))
-					throw new BadRequestException(
-						this.errorAdapter.getNotFoundError(
-							`Option id ${optionId} does not exist`,
-						),
+					this.errorAdapter.throwBadRequestNotFoundError(
+						`Option id ${optionId} does not exist`,
 					)
 			}
 
@@ -352,10 +340,8 @@ export class VariantsService {
 			for (const combination of optionsCombinationArray) {
 				//? Validate combination.length
 				if (combination.length !== uniqueVariantsIds.length)
-					throw new BadRequestException(
-						this.errorAdapter.getValidationError(
-							`All optionCombination must have length: ${uniqueVariantsIds.length}. But got length '${combination.length}' in [${combination.join(', ')}]`,
-						),
+					this.errorAdapter.throwBadRequestValidationError(
+						`All optionCombination must have length: ${uniqueVariantsIds.length}. But got length '${combination.length}' in [${combination.join(', ')}]`,
 					)
 				// Array of variantsIds
 				const variantsIdsInCombination = combination.map(
@@ -369,10 +355,8 @@ export class VariantsService {
 					variantsIdsInCombination.length !==
 					uniqueVariantsIdsForCombination.size
 				)
-					throw new BadRequestException(
-						this.errorAdapter.getValidationError(
-							`More than one options belongs the same variant in combination [${combination.join(', ')}]`,
-						),
+					this.errorAdapter.throwBadRequestValidationError(
+						`More than one options belongs the same variant in combination [${combination.join(', ')}]`,
 					)
 			}
 
@@ -497,10 +481,8 @@ export class VariantsService {
 		const isValidName = await this.isValidName(name, client)
 
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist a variant with name '${name}'`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist a variant with name '${name}'`,
 			)
 	}
 

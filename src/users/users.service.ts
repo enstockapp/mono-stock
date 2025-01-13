@@ -1,6 +1,6 @@
 import { DeleteResult, Repository } from 'typeorm'
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { PermissionsService, RolesService } from 'src/roles'
@@ -77,8 +77,9 @@ export class UsersService {
 			if (!publicUser) return user
 			return this.transformUserInPublicUser(user)
 		}
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(`User with id '${id}' not found`),
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`User with id '${id}' not found`,
 		)
 	}
 
@@ -93,10 +94,9 @@ export class UsersService {
 			relations: ['roles', 'roles.permissions', 'client'],
 		})
 		if (user?.isActive) return user
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`User with email '${email}' not found`,
-			),
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`User with email '${email}' not found`,
 		)
 	}
 

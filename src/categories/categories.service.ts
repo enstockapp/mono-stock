@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { Client } from 'src/client'
@@ -116,10 +116,8 @@ export class CategoriesService {
 
 		if (category) return category
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Category with id/name '${term}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Category with id/name '${term}' not found`,
 		)
 	}
 
@@ -149,10 +147,8 @@ export class CategoriesService {
 			})
 
 			if (!category)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Category with id '${id}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Category with id '${id}' not found`,
 				)
 
 			// Create Query Runner
@@ -218,10 +214,8 @@ export class CategoriesService {
 		const isValidName = await this.isValidName(name, client)
 
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist a category with name '${name}'`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist a category with name '${name}'`,
 			)
 	}
 

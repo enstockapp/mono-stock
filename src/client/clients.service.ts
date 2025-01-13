@@ -1,6 +1,6 @@
 import { DeleteResult, Repository } from 'typeorm'
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import { Client } from './entities'
@@ -41,8 +41,9 @@ export class ClientsService {
 	async findOneById(id: string): Promise<Client> {
 		const client = await this.clientRepository.findOneBy({ id })
 		if (client?.isActive) return client
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(`Client with id '${id}' not found`),
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Client with id '${id}' not found`,
 		)
 	}
 
@@ -54,10 +55,9 @@ export class ClientsService {
 	async findOneByEmail(email: string): Promise<Client> {
 		const client = await this.clientRepository.findOne({ where: { email } })
 		if (client?.isActive) return client
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Client with email '${email}' not found`,
-			),
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Client with email '${email}' not found`,
 		)
 	}
 

@@ -1,6 +1,6 @@
 import { Repository, DataSource } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import {
 	HandleErrorAdapter,
@@ -102,10 +102,8 @@ export class VariantOptionsService {
 
 		if (variantOption) return variantOption
 
-		throw new BadRequestException(
-			this.errorAdapter.getNotFoundError(
-				`Option with id/name '${term}' not found`,
-			),
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`Option with id/name '${term}' not found`,
 		)
 	}
 
@@ -134,10 +132,8 @@ export class VariantOptionsService {
 			})
 
 			if (!variantOption)
-				throw new BadRequestException(
-					this.errorAdapter.getNotFoundError(
-						`Option with id '${id}' not found`,
-					),
+				this.errorAdapter.throwBadRequestNotFoundError(
+					`Option with id '${id}' not found`,
 				)
 
 			// Create Query Runner
@@ -210,10 +206,8 @@ export class VariantOptionsService {
 	async throwErrorIfExistName(name: string, variant: Variant): Promise<void> {
 		const isValidName = await this.isValidName(name, variant)
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist an option with name '${name}'`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist an option with name '${name}'`,
 			)
 	}
 
@@ -231,10 +225,8 @@ export class VariantOptionsService {
 		const isValidName = await this.areValidNames(names, variant)
 
 		if (!isValidName)
-			throw new BadRequestException(
-				this.errorAdapter.getDuplicateKeyError(
-					`Already exist option with some names: ${names.join(', ')}`,
-				),
+			this.errorAdapter.throwBadRequestDuplicateKeyError(
+				`Already exist option with some names: ${names.join(', ')}`,
 			)
 	}
 
