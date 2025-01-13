@@ -32,6 +32,13 @@ export class SalesService {
 		private readonly errorAdapter: HandleErrorAdapter,
 	) {}
 
+	/**
+	 * Create a sale
+	 * @param {CreateSaleDto} createSaleDto
+	 * @param {Client} client
+	 * @return {*}  {Promise<Sale>}
+	 * @memberof SalesService
+	 */
 	async create(createSaleDto: CreateSaleDto, client: Client): Promise<Sale> {
 		const { saleItems, customerId } = createSaleDto
 		const { mainCurrency } = client
@@ -74,6 +81,15 @@ export class SalesService {
 		}
 	}
 
+	/**
+	 * Find all sales by client and filters
+	 * @param {PaginationDto} paginationDto
+	 * @param {SortingDto} sortingDto
+	 * @param {SalesFilteringDto} filteringDto
+	 * @param {Client} client
+	 * @return {*}  {Promise<PaginatedResponse>}
+	 * @memberof SalesService
+	 */
 	async findAll(
 		paginationDto: PaginationDto,
 		sortingDto: SortingDto,
@@ -123,6 +139,13 @@ export class SalesService {
 		return { page, size, total, items: sales }
 	}
 
+	/**
+	 * Find one sale by id
+	 * @param {number} id
+	 * @param {Client} client
+	 * @return {*}  {Promise<Sale>}
+	 * @memberof SalesService
+	 */
 	async findOne(id: number, client: Client): Promise<Sale> {
 		const queryBuilder = this.salesRepository.createQueryBuilder(
 			this.queryBuilderAlias,
@@ -149,6 +172,13 @@ export class SalesService {
 		)
 	}
 
+	/**
+	 * Delete a sale by id
+	 * @param {number} id
+	 * @param {Client} client
+	 * @return {*}  {Promise<Sale>}
+	 * @memberof SalesService
+	 */
 	async delete(id: number, client: Client): Promise<Sale> {
 		const queryBuilder = this.salesRepository.createQueryBuilder(
 			this.queryBuilderAlias,
@@ -172,6 +202,18 @@ export class SalesService {
 		}
 	}
 
+	/**
+	 * Validate currencyExchange when create a sale
+	 * @private
+	 * @param {CreateSaleDto} saleDto
+	 * @param {Currency} mainCurrency
+	 * @return {*}  {{
+	 * 		currencyExchangeFrom: Currency
+	 * 		currencyExchangeTo: Currency
+	 * 		exchangeRate: number
+	 * 	}}
+	 * @memberof SalesService
+	 */
 	private _validateCurrencyExchange(
 		saleDto: CreateSaleDto,
 		mainCurrency: Currency,

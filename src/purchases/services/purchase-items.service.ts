@@ -1,4 +1,4 @@
-import { In, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
@@ -27,6 +27,13 @@ export class PurchaseItemsService {
 		private readonly errorAdapter: HandleErrorAdapter,
 	) {}
 
+	/**
+	 * Create multiple purchaseItems
+	 * @param {PurchaseItemWithStock[]} purchaseItemsWithStock
+	 * @param {Purchase} purchase
+	 * @return {*}  {Promise<PurchaseItem[]>}
+	 * @memberof PurchaseItemsService
+	 */
 	async createMultiples(
 		purchaseItemsWithStock: PurchaseItemWithStock[],
 		purchase: Purchase,
@@ -42,6 +49,14 @@ export class PurchaseItemsService {
 		}
 	}
 
+	/**
+	 * Create a single PurchaseItem
+	 * @private
+	 * @param {PurchaseItemWithStock} purchaseItemWithStock
+	 * @param {Purchase} purchase
+	 * @return {*}  {Promise<PurchaseItem>}
+	 * @memberof PurchaseItemsService
+	 */
 	private async _create(
 		purchaseItemWithStock: PurchaseItemWithStock,
 		purchase: Purchase,
@@ -69,6 +84,13 @@ export class PurchaseItemsService {
 		}
 	}
 
+	/**
+	 * Find all PurchaseItem by Purchase.id
+	 *
+	 * @param {number} purchaseId
+	 * @return {*}  {Promise<PurchaseItem[]>}
+	 * @memberof PurchaseItemsService
+	 */
 	async findAllByPurchaseId(purchaseId: number): Promise<PurchaseItem[]> {
 		const purchaseItems = await this.purchaseItemsRepository.find({
 			where: { purchase: { id: purchaseId } },
@@ -81,18 +103,14 @@ export class PurchaseItemsService {
 		)
 	}
 
-	async findAllByIds(ids: number[]): Promise<PurchaseItem[]> {
-		const purchaseItems = await this.purchaseItemsRepository.find({
-			where: { id: In(ids) },
-			relations: { productStock: { product: true } },
-		})
-		if (ids.length != purchaseItems.length)
-			this.errorAdapter.throwBadRequestNotFoundError(
-				`Some PurchaseItems ids were not found. NotFoundCount: (${ids.length - purchaseItems.length})`,
-			)
-		return purchaseItems
-	}
-
+	/**
+	 * Delete all PurchaseItem by Purchase
+	 * @param {Purchase} purchase
+	 * @param {PurchaseItem[]} purchaseItems
+	 * @param {Client} client
+	 * @return {*}  {Promise<PurchaseItem[]>}
+	 * @memberof PurchaseItemsService
+	 */
 	async deleteByPurchase(
 		purchase: Purchase,
 		purchaseItems: PurchaseItem[],
@@ -135,6 +153,16 @@ export class PurchaseItemsService {
 		}
 	}
 
+	/**
+	 * Validate PurchaseItemsDto and get PurchaseItemWithStock[] and total amount
+	 * @param {PurchaseItemDto[]} purchaseItems
+	 * @param {Client} client
+	 * @return {*}  {Promise<{
+	 * 		purchaseItemsWithStock: PurchaseItemWithStock[]
+	 * 		total: number
+	 * 	}>}
+	 * @memberof PurchaseItemsService
+	 */
 	async validationForPurchaseItems(
 		purchaseItems: PurchaseItemDto[],
 		client: Client,
@@ -167,6 +195,15 @@ export class PurchaseItemsService {
 		return { purchaseItemsWithStock, total }
 	}
 
+	/**
+	 * Get PurchaseItemWithStock from PurchaseItemDto[] and ProductStock[]
+	 * @private
+	 * @param {PurchaseItemDto[]} purchaseItemsDto
+	 * @param {ProductStock[]} productStocks
+	 * @param {Client} client
+	 * @return {*}  {PurchaseItemWithStock[]}
+	 * @memberof PurchaseItemsService
+	 */
 	private _getPurchaseItemsWithStock(
 		purchaseItemsDto: PurchaseItemDto[],
 		productStocks: ProductStock[],

@@ -1,4 +1,4 @@
-import { In, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
@@ -28,6 +28,13 @@ export class SaleItemsService {
 		private readonly errorAdapter: HandleErrorAdapter,
 	) {}
 
+	/**
+	 * Create multiple SaleItem
+	 * @param {SaleItemWithStock[]} saleItemsWithStock
+	 * @param {Sale} sale
+	 * @return {*}  {Promise<SaleItem[]>}
+	 * @memberof SaleItemsService
+	 */
 	async createMultiples(
 		saleItemsWithStock: SaleItemWithStock[],
 		sale: Sale,
@@ -43,6 +50,14 @@ export class SaleItemsService {
 		}
 	}
 
+	/**
+	 * Create single SaleItem
+	 * @private
+	 * @param {SaleItemWithStock} saleItemWithStock
+	 * @param {Sale} sale
+	 * @return {*}  {Promise<SaleItem>}
+	 * @memberof SaleItemsService
+	 */
 	private async _create(
 		saleItemWithStock: SaleItemWithStock,
 		sale: Sale,
@@ -70,6 +85,12 @@ export class SaleItemsService {
 		}
 	}
 
+	/**
+	 * Find all SaleItem by saleId
+	 * @param {number} saleId
+	 * @return {*}  {Promise<SaleItem[]>}
+	 * @memberof SaleItemsService
+	 */
 	async findAllBySaleId(saleId: number): Promise<SaleItem[]> {
 		const saleItems = await this.saleItemsRepository.find({
 			where: { sale: { id: saleId } },
@@ -82,18 +103,14 @@ export class SaleItemsService {
 		)
 	}
 
-	async findAllByIds(ids: number[]): Promise<SaleItem[]> {
-		const saleItems = await this.saleItemsRepository.find({
-			where: { id: In(ids) },
-			relations: { productStock: { product: true } },
-		})
-		if (ids.length != saleItems.length)
-			this.errorAdapter.throwBadRequestNotFoundError(
-				`Some SaleItems ids were not found. NotFoundCount: (${ids.length - saleItems.length})`,
-			)
-		return saleItems
-	}
-
+	/**
+	 * Delete all SaleItem by Sale.id
+	 * @param {Sale} sale
+	 * @param {SaleItem[]} saleItems
+	 * @param {Client} client
+	 * @return {*}  {Promise<SaleItem[]>}
+	 * @memberof SaleItemsService
+	 */
 	async deleteBySale(
 		sale: Sale,
 		saleItems: SaleItem[],
@@ -135,6 +152,17 @@ export class SaleItemsService {
 		}
 	}
 
+	/**
+	 * Validate all SaleItemsDto[] ang ger saleItemsWithStock and total
+	 *
+	 * @param {SaleItemDto[]} saleItems
+	 * @param {Client} client
+	 * @return {*}  {Promise<{
+	 * 		saleItemsWithStock: SaleItemWithStock[]
+	 * 		total: number
+	 * 	}>}
+	 * @memberof SaleItemsService
+	 */
 	async validationForSaleItems(
 		saleItems: SaleItemDto[],
 		client: Client,
@@ -172,6 +200,15 @@ export class SaleItemsService {
 		return { saleItemsWithStock, total }
 	}
 
+	/**
+	 * get SaleItemsWithStock from SaleItem[] and ProductStock[]
+	 * @private
+	 * @param {SaleItemDto[]} saleItemsDto
+	 * @param {ProductStock[]} productStocks
+	 * @param {Client} client
+	 * @return {*}  {SaleItemWithStock[]}
+	 * @memberof SaleItemsService
+	 */
 	private _getSaleItemsWithStock(
 		saleItemsDto: SaleItemDto[],
 		productStocks: ProductStock[],

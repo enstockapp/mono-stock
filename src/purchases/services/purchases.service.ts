@@ -36,6 +36,13 @@ export class PurchasesService {
 		private readonly errorAdapter: HandleErrorAdapter,
 	) {}
 
+	/**
+	 * Create Purchase
+	 * @param {CreatePurchaseDto} createPurchaseDto
+	 * @param {Client} client
+	 * @return {*}  {Promise<Purchase>}
+	 * @memberof PurchasesService
+	 */
 	async create(
 		createPurchaseDto: CreatePurchaseDto,
 		client: Client,
@@ -84,6 +91,15 @@ export class PurchasesService {
 		}
 	}
 
+	/**
+	 * Find all purchase by filters
+	 * @param {PaginationDto} paginationDto
+	 * @param {SortingDto} sortingDto
+	 * @param {PurchasesFilteringDto} filteringDto
+	 * @param {Client} client
+	 * @return {*}  {Promise<PaginatedResponse>}
+	 * @memberof PurchasesService
+	 */
 	async findAll(
 		paginationDto: PaginationDto,
 		sortingDto: SortingDto,
@@ -133,6 +149,13 @@ export class PurchasesService {
 		return { page, size, total, items: purchases }
 	}
 
+	/**
+	 * Find one Purchase by id
+	 * @param {number} id
+	 * @param {Client} client
+	 * @return {*}  {Promise<Purchase>}
+	 * @memberof PurchasesService
+	 */
 	async findOne(id: number, client: Client): Promise<Purchase> {
 		const queryBuilder = this.purchasesRepository.createQueryBuilder(
 			this.queryBuilderAlias,
@@ -162,6 +185,13 @@ export class PurchasesService {
 		)
 	}
 
+	/**
+	 * Delete a Purchase by id
+	 * @param {number} id
+	 * @param {Client} client
+	 * @return {*}  {Promise<Purchase>}
+	 * @memberof PurchasesService
+	 */
 	async delete(id: number, client: Client): Promise<Purchase> {
 		const queryBuilder = this.purchasesRepository.createQueryBuilder(
 			this.queryBuilderAlias,
@@ -189,6 +219,18 @@ export class PurchasesService {
 		}
 	}
 
+	/**
+	 * Validate currencyExchange for a Purchase
+	 * @private
+	 * @param {CreatePurchaseDto} purchaseDto
+	 * @param {Currency} mainCurrency
+	 * @return {*}  {{
+	 * 		currencyExchangeFrom: Currency
+	 * 		currencyExchangeTo: Currency
+	 * 		exchangeRate: number
+	 * 	}}
+	 * @memberof PurchasesService
+	 */
 	private _validateCurrencyExchange(
 		purchaseDto: CreatePurchaseDto,
 		mainCurrency: Currency,
