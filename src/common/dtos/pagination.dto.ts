@@ -21,6 +21,7 @@ export class PaginationDto {
 	@ApiProperty({
 		default: 0,
 		description: 'Page number',
+		required: false,
 	})
 	@IsOptional()
 	@IsNumber()
@@ -31,6 +32,7 @@ export class PaginationDto {
 	@ApiProperty({
 		default: 10,
 		description: 'How many results do you want per page',
+		required: false,
 	})
 	@IsOptional()
 	@IsNumber()

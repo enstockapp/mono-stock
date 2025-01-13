@@ -31,7 +31,6 @@ export class CustomersController {
 	 * @memberof CustomersController
 	 */
 	@Post()
-	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	create(
 		@Body() createCustomerDto: CreateCustomerDto,
 		@GetUser('client') client: Client,

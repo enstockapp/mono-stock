@@ -18,6 +18,7 @@ import {
 } from 'src/common'
 import { Auth, GetUser } from 'src/auth'
 import { Client } from 'src/client'
+import { RoleEnum } from 'src/roles'
 
 import {
 	CreateProductUniqueDto,
@@ -25,13 +26,16 @@ import {
 	UpdateProductDto,
 	ProductsFilteringDto,
 } from './dto'
-import { ProductsService } from './services'
+import { ProductsService, ProductStocksService } from './services'
 import { Product } from './entities'
 import { ValidSortingValuesProducts } from './constants'
 
 @Controller('products')
 export class ProductsController {
-	constructor(private readonly productsService: ProductsService) {}
+	constructor(
+		private readonly productsService: ProductsService,
+		private readonly productStocksService: ProductStocksService,
+	) {}
 
 	/**
 	 * Create a product without variants
@@ -41,7 +45,7 @@ export class ProductsController {
 	 * @memberof ProductsController
 	 */
 	@Post('unique')
-	@Auth()
+	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	createUnique(
 		@Body() createProductUniqueDto: CreateProductUniqueDto,
 		@GetUser('client') client: Client,
@@ -57,7 +61,7 @@ export class ProductsController {
 	 * @memberof ProductsController
 	 */
 	@Post('with-variants')
-	@Auth()
+	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	createWithVariants(
 		@Body() createProductWithVariantsDto: CreateProductWithVariantsDto,
 		@GetUser('client') client: Client,
@@ -119,7 +123,7 @@ export class ProductsController {
 	 * @memberof ProductsController
 	 */
 	@Patch(':id')
-	@Auth()
+	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	update(
 		@Param('id', ParseIntPipe) id: number,
 		@Body() updateProductUniqueDto: UpdateProductDto,
@@ -136,6 +140,7 @@ export class ProductsController {
 	 * @memberof ProductsController
 	 */
 	@Delete(':id')
+	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	remove(
 		@Param('id', ParseIntPipe) id: number,
 		@GetUser('client') client: Client,

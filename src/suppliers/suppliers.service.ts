@@ -70,7 +70,7 @@ export class SuppliersService {
 		}
 	}
 
-	async findOne(term: string, client: Client): Promise<Supplier> {
+	async findOne(term: string | number, client: Client): Promise<Supplier> {
 		let supplier: Supplier | undefined = undefined
 		const queryBuilder = this.suppliersRepository.createQueryBuilder(
 			this.queryBuilderAlias,
@@ -83,7 +83,7 @@ export class SuppliersService {
 				}
 			: {
 					condition: 'UPPER(name) = :name',
-					parameters: { name: term.toUpperCase() },
+					parameters: { name: `${term}`.toUpperCase() },
 				}
 
 		supplier = await queryBuilder

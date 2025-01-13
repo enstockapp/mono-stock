@@ -24,6 +24,6 @@ import { ProductsController } from './products.controller'
 		CommonModule,
 		VariantsModule,
 	],
-	exports: [ProductsService],
+	exports: [ProductsService, ProductStocksService],
 })
 export class ProductsModule {}

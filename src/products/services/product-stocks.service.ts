@@ -1,13 +1,14 @@
-import { Repository, In } from 'typeorm'
-import { Injectable } from '@nestjs/common'
+import { Repository, In, DataSource, DeepPartial } from 'typeorm'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
-import { HandleErrorAdapter, Status } from 'src/common'
+import { HandleErrorAdapter, Status, Variation } from 'src/common'
 import { Variant, VariantsService, VariantSummary } from 'src/variants'
 
 import { ItemVariantDto, StockDto } from '../dto'
 import { Product, ProductStock } from '../entities'
 import { ProductStockType } from '../enums'
+import { Client } from 'src/client'
 
 @Injectable()
 export class ProductStocksService {
@@ -17,6 +18,7 @@ export class ProductStocksService {
 	constructor(
 		@InjectRepository(ProductStock)
 		private readonly productStocksRepository: Repository<ProductStock>,
+		private readonly dataSource: DataSource,
 		private readonly variantsService: VariantsService,
 		private readonly errorAdapter: HandleErrorAdapter,
 	) {}
@@ -34,7 +36,6 @@ export class ProductStocksService {
 				...stock,
 				product,
 				type: ProductStockType.Unique,
-				cost: product.baseCost,
 				quantity: stock.initialQuantity,
 			})
 
@@ -120,7 +121,6 @@ export class ProductStocksService {
 				product,
 				type: ProductStockType.Child,
 				quantity: stock.initialQuantity,
-				cost: product.baseCost,
 				optionCombination,
 			})
 
@@ -138,11 +138,111 @@ export class ProductStocksService {
 	 * @return {*}  {Promise<any>}
 	 * @memberof ProductStocksService
 	 */
-	private async _findAllByIds(ids: number[]): Promise<any> {
+	async findAllByIds(ids: number[]): Promise<ProductStock[]> {
 		const productStocks = await this.productStocksRepository.find({
 			where: { id: In(ids) },
-			relations: { optionCombination: true },
+			relations: {
+				product: {
+					client: true,
+					variants: { variant: { variantOptions: true } },
+				},
+			},
 		})
+		if (ids.length != productStocks.length)
+			throw new BadRequestException(
+				this.errorAdapter.getNotFoundError(
+					`Some ProductStock ids were not found. NotFoundCount: (${ids.length - productStocks.length})`,
+				),
+			)
+		return productStocks
+	}
+
+	/**
+	 * Update quantity for a ProductStock
+	 * @param {ProductStock} productStock
+	 * @param {number} quantity
+	 * @param {Variation} variation
+	 * @return {*}  {Promise<ProductStock>}
+	 * @memberof ProductStocksService
+	 */
+	async updateQuantity(
+		productStock: ProductStock,
+		quantity: number,
+		variation: Variation,
+	): Promise<ProductStock> {
+		const newQuantity =
+			variation === Variation.Increment
+				? productStock.quantity + quantity
+				: productStock.quantity - quantity
+
+		return await this._update(productStock.id, { quantity: newQuantity })
+	}
+
+	/**
+	 * Update a ProductStock
+	 * @private
+	 * @param {number} id
+	 * @param {DeepPartial<ProductStock>} entityLike
+	 * @return {*}  {Promise<ProductStock>}
+	 * @memberof ProductStocksService
+	 */
+	private async _update(
+		id: number,
+		entityLike: DeepPartial<ProductStock>,
+	): Promise<ProductStock> {
+		try {
+			const productStock = await this.productStocksRepository.preload({
+				...entityLike,
+				id,
+			})
+
+			if (!productStock)
+				throw new BadRequestException(
+					this.errorAdapter.getNotFoundError(
+						`ProductStock with id '${id}' not found`,
+					),
+				)
+
+			// Create Query Runner
+			const queryRunner = this.dataSource.createQueryRunner()
+			await queryRunner.connect()
+			await queryRunner.startTransaction()
+
+			// Save productStock
+			await queryRunner.manager.save(productStock)
+			await queryRunner.commitTransaction()
+
+			// Release Query Runner
+			await queryRunner.release()
+
+			return productStock
+		} catch (error) {}
+	}
+
+	/**
+	 * Validate all ids are valid for the client
+	 * @param {number[]} ids
+	 * @param {Client} client
+	 * @return {*}  {Promise<ProductStock[]>}
+	 * @memberof ProductStocksService
+	 */
+	async validateProductStockIdsByClient(
+		ids: number[],
+		client: Client,
+	): Promise<ProductStock[]> {
+		const productStocks = await this.findAllByIds(ids)
+		const clientId = client.id
+		const productStocksFiltered = productStocks.filter(
+			ps => ps.product.client.id !== clientId,
+		)
+
+		if (productStocksFiltered.length > 0)
+			throw new BadRequestException(
+				this.errorAdapter.getNotFoundError(
+					`Some ProductStock ids are not valid. NotValidCount: (${productStocksFiltered.length})`,
+				),
+			)
+
 		return productStocks
 	}
 

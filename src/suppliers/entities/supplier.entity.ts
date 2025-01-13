@@ -27,7 +27,7 @@ export class Supplier implements Contact {
 		name: 'identification_type',
 		type: 'enum',
 		enum: IdentificationType,
-		nullable: true,
+		default: IdentificationType.None,
 	})
 	identificationType?: IdentificationType
 

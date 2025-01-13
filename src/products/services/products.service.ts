@@ -1,8 +1,10 @@
-import { DataSource, ILike, Repository } from 'typeorm'
+import { DataSource, DeepPartial, ILike, Repository } from 'typeorm'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
 import {
+	EntityAction,
+	getAmountInMainCurrency,
 	getPagination,
 	getSorting,
 	getUniqueArraysNumbersArray,
@@ -10,26 +12,27 @@ import {
 	PaginatedResponse,
 	PaginationDto,
 	SortingDto,
+	Variation,
 	WhereQueryBuilder,
 } from 'src/common'
 import { Client } from 'src/client'
 import { CategoriesService, Category } from 'src/categories'
+import { VariantsService } from 'src/variants'
+import { Purchase, PurchaseItem, PurchaseItemWithStock } from 'src/purchases'
 
 import {
 	CreateProductUniqueDto,
 	CreateProductWithVariantsDto,
 	UpdateProductDto,
+	getProductsFiltering,
+	ProductsFilteringDto,
 } from '../dto'
 import { Product } from '../entities'
 import { ProductType } from '../enums'
 import { ProductStocksService } from './product-stocks.service'
-import { VariantsService } from 'src/variants'
 import { ProductVariantsService } from './product-variants.service'
-import {
-	getProductsFiltering,
-	ProductsFilteringDto,
-} from '../dto/products-filtering.dto'
 import { ValidSortingValuesProducts } from '../constants'
+import { PurchaseItemDto } from 'src/purchases/dtos'
 
 @Injectable()
 export class ProductsService {
@@ -237,12 +240,7 @@ export class ProductsService {
 			order: { [sort]: order },
 		})
 
-		return {
-			page,
-			size,
-			total,
-			items: products,
-		}
+		return { page, size, total, items: products }
 	}
 
 	/**
@@ -252,8 +250,7 @@ export class ProductsService {
 	 * @return {*}  {Promise<Product>}
 	 * @memberof ProductsService
 	 */
-	async findOne(term: string, client: Client): Promise<Product> {
-		let product: Product | undefined = undefined
+	async findOne(term: string | number, client: Client): Promise<Product> {
 		const queryBuilder = this.productsRepository.createQueryBuilder(
 			this.queryBuilderAlias,
 		)
@@ -265,10 +262,10 @@ export class ProductsService {
 				}
 			: {
 					condition: 'UPPER(name) = :name',
-					parameters: { name: term.toUpperCase() },
+					parameters: { name: `${term}`.toUpperCase() },
 				}
 
-		product = await queryBuilder
+		const product = await queryBuilder
 			.where(where.condition, where.parameters)
 			.andWhere('client_id = :clientId', { clientId: client.id })
 			.getOne()
@@ -283,6 +280,60 @@ export class ProductsService {
 	}
 
 	/**
+	 * Update baseCost, averageCost and totalForAverageCost
+	 * @param {Purchase} purchase
+	 * @param {PurchaseItem} purchaseItem
+	 * @param {Product} product
+	 * @param {Client} client
+	 * @return {*}  {Promise<Product>}
+	 * @memberof ProductsService
+	 */
+	async updateCostFromPurchaseItem(
+		purchase: Purchase,
+		purchaseItem: PurchaseItem | PurchaseItemDto,
+		product: Product,
+		client: Client,
+		action: EntityAction.Create | EntityAction.Delete,
+	): Promise<Product> {
+		const { currency, currencyExchangeFrom, exchangeRate } = purchase
+		const { id, totalForAverageCost, averageCost } = product
+		const { updateProductBaseCost, quantity, amount } = purchaseItem
+		const { mainCurrency } = client
+
+		const cost = getAmountInMainCurrency(
+			mainCurrency,
+			currency,
+			currencyExchangeFrom,
+			exchangeRate,
+			amount,
+		)
+
+		// Create Product like
+		const productLike: DeepPartial<Product> = { client }
+
+		// calculate new values
+		const currentTotalCost = totalForAverageCost * averageCost
+		const amountToModifyTotalCost = quantity * cost
+
+		let newTotalForAverageCost = totalForAverageCost + quantity
+		let newAverageCost =
+			(currentTotalCost + amountToModifyTotalCost) / newTotalForAverageCost
+
+		// If it's a delete, substract
+		if (action === EntityAction.Delete) {
+			newTotalForAverageCost = totalForAverageCost - quantity
+			newAverageCost =
+				(currentTotalCost - amountToModifyTotalCost) / newTotalForAverageCost
+		}
+
+		if (updateProductBaseCost) productLike.baseCost = +cost.toFixed(2)
+		productLike.totalForAverageCost = newTotalForAverageCost
+		productLike.averageCost = +newAverageCost.toFixed(2)
+
+		return await this._update(id, productLike)
+	}
+
+	/**
 	 * Update base product data
 	 * @param {number} id
 	 * @param {UpdateProductDto} updateProductDto
@@ -294,17 +345,34 @@ export class ProductsService {
 		id: number,
 		updateProductDto: UpdateProductDto,
 		client: Client,
-	): Promise<any> {
-		const { name } = updateProductDto
+	): Promise<Product> {
+		return await this._update(id, {
+			...updateProductDto,
+			client,
+		})
+	}
+
+	/**
+	 * Private update Product
+	 * @private
+	 * @param {number} id
+	 * @param {DeepPartial<Product>} entityLike
+	 * @return {*}  {Promise<Product>}
+	 * @memberof ProductsService
+	 */
+	private async _update(
+		id: number,
+		entityLike: DeepPartial<Product>,
+	): Promise<Product> {
+		const { name, client } = entityLike
 		try {
 			// Verify if exist a category with the same name
-			if (name) await this.throwErrorIfExistName(name, client)
+			if (name) await this.throwErrorIfExistName(name, client as Client)
 
-			// preload: search for id and preload the fields in updateCategoryDto
+			// preload: search for id and preload the fields
 			const product = await this.productsRepository.preload({
-				...updateProductDto,
+				...entityLike,
 				id,
-				client,
 			})
 
 			if (!product)
@@ -326,7 +394,7 @@ export class ProductsService {
 			// Release Query Runner
 			await queryRunner.release()
 
-			return await this.findOne(product.id.toString(), client)
+			return await this.findOne(product.id, client as Client)
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -347,6 +415,43 @@ export class ProductsService {
 		} catch (error) {
 			this.handleDBError(error)
 		}
+	}
+
+	/**
+	 * Update product (averageCost, totalForAverageCost, baseCost) and ProductStock quantity
+	 * @param {PurchaseItemWithStock} purchaseItemWithStock
+	 * @param {Purchase} purchase
+	 * @param {(EntityAction.Create | EntityAction.Delete)} entityAction
+	 * @memberof ProductsService
+	 */
+	async updateProductStockAndProduct(
+		purchaseItemWithStock: PurchaseItemWithStock,
+		purchase: Purchase,
+		entityAction: EntityAction.Create | EntityAction.Delete,
+	) {
+		const { productStock, product, client, purchaseItemDto } =
+			purchaseItemWithStock
+
+		// Update productStocks: quantity
+		const variation =
+			entityAction === EntityAction.Delete
+				? Variation.Decrement
+				: Variation.Increment
+
+		await this.productStocksService.updateQuantity(
+			productStock,
+			purchaseItemDto.quantity,
+			variation,
+		)
+
+		// Update product: averageCost, totalForAverageCost, baseCost
+		await this.updateCostFromPurchaseItem(
+			purchase,
+			purchaseItemDto as PurchaseItemDto,
+			product,
+			client,
+			entityAction,
+		)
 	}
 
 	/**

@@ -39,8 +39,8 @@ export class ProductStock {
 	@Column('int', { default: 0 })
 	quantity: number
 
-	@Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-	cost: number
+	@Column('jsonb', { default: '{}' })
+	metadata: Record<string, any>
 
 	/*? Status id defined in parent
 	 	ProductStockType.Unique => Product.status

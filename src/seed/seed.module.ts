@@ -8,6 +8,7 @@ import { AuthModule } from 'src/auth/auth.module'
 import { VariantsModule } from 'src/variants/variants.module'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { ProductsModule } from 'src/products/products.module'
+import { SuppliersModule } from 'src/suppliers/suppliers.module'
 
 @Module({
 	providers: [SeedService],
@@ -19,6 +20,7 @@ import { ProductsModule } from 'src/products/products.module'
 		UsersModule,
 		VariantsModule,
 		ProductsModule,
+		SuppliersModule,
 	],
 	controllers: [SeedController],
 })

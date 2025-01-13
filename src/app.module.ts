@@ -15,6 +15,7 @@ import { VariantsModule } from './variants/variants.module'
 import { ProductsModule } from './products/products.module'
 import { SuppliersModule } from './suppliers/suppliers.module'
 import { CustomersModule } from './customers/customers.module'
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
 	imports: [
@@ -48,6 +49,7 @@ import { CustomersModule } from './customers/customers.module'
 		ProductsModule,
 		SuppliersModule,
 		CustomersModule,
+		PurchasesModule,
 	],
 })
 export class AppModule {}

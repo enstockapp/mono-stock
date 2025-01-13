@@ -1,4 +1,6 @@
+export * from './create-contact.dto'
+export * from './create-stock-transaction.dto'
 export * from './filtering.dto'
 export * from './pagination.dto'
 export * from './sorting.dto'
-export * from './create-contact.dto'
+export * from './stock-transaction-item.dto'
