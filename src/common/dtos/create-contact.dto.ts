@@ -7,7 +7,7 @@ import {
 	IsString,
 	MinLength,
 } from 'class-validator'
-import { IdentificationType } from 'src/client'
+import { IdentificationType } from 'src/common'
 
 export class CreateContactDto {
 	@ApiProperty()

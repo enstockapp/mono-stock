@@ -11,11 +11,4 @@ export class StockTransactionItemDto {
 	@IsNumber()
 	@IsPositive()
 	quantity: number
-
-	@ApiProperty({
-		description: 'maxDecimalPlaces: 2',
-	})
-	@IsNumber({ maxDecimalPlaces: 2 })
-	@IsPositive()
-	amount: number
 }

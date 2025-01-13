@@ -1,6 +1,6 @@
 import { RoleEnum } from 'src/roles'
-import { CreateClientDto, IdentificationType } from 'src/client'
-import { Currency } from 'src/common'
+import { CreateClientDto } from 'src/client'
+import { Currency, IdentificationType } from 'src/common'
 import { CreateUserDto } from 'src/users'
 
 const EnStock = {

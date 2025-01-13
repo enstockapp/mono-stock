@@ -8,8 +8,7 @@ import {
 	UpdateDateColumn,
 } from 'typeorm'
 
-import { Currency } from 'src/common'
-import { IdentificationType } from '../enums'
+import { Currency, IdentificationType } from 'src/common'
 
 @Entity('clients')
 export class Client {

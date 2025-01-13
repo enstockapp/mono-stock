@@ -7,8 +7,7 @@ import {
 	IsUUID,
 	MinLength,
 } from 'class-validator'
-import { IdentificationType } from '../enums'
-import { Currency } from 'src/common'
+import { Currency, IdentificationType } from 'src/common'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class CreateClientDto {

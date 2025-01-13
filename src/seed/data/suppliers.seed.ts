@@ -1,4 +1,4 @@
-import { IdentificationType } from 'src/client'
+import { IdentificationType } from 'src/common'
 import { CreateSupplierDto } from 'src/suppliers'
 
 export const SupplierDB: CreateSupplierDto[] = [

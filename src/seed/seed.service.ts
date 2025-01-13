@@ -11,6 +11,7 @@ import {
 	CategoriesDB,
 	VariantsDB,
 	SupplierDB,
+	CustomersDB,
 } from './data'
 import { Client, ClientsService } from 'src/client'
 import { CategoriesService, Category } from 'src/categories'
@@ -19,6 +20,7 @@ import { ProductsService } from 'src/products'
 import { ProductsDB } from './data/products.seed'
 import { getRandomFromArray } from './utils/get-random-from-array.util'
 import { Supplier, SuppliersService } from 'src/suppliers'
+import { CustomersService } from 'src/customers'
 
 @Injectable()
 export class SeedService {
@@ -31,6 +33,7 @@ export class SeedService {
 		private readonly variantsService: VariantsService,
 		private readonly productsService: ProductsService,
 		private readonly suppliersService: SuppliersService,
+		private readonly customersService: CustomersService,
 	) {}
 
 	/**
@@ -54,6 +57,7 @@ export class SeedService {
 			const categories = await this.insertCategories(client)
 			const variants = await this.insertVariants(client)
 			await this.insertSuppliers(client)
+			await this.insertCustomers(client)
 			await this.insertProductsUnique(client, getRandomFromArray(categories))
 			await this.insertProductsWithVariants(client, variants)
 		}
@@ -144,6 +148,14 @@ export class SeedService {
 		const promises = []
 		for (const supplierDto of SupplierDB) {
 			promises.push(this.suppliersService.create(supplierDto, client))
+		}
+		return await Promise.all(promises)
+	}
+
+	private async insertCustomers(client: Client): Promise<Supplier[]> {
+		const promises = []
+		for (const customerDto of CustomersDB) {
+			promises.push(this.customersService.create(customerDto, client))
 		}
 		return await Promise.all(promises)
 	}

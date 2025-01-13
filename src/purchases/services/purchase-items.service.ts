@@ -57,7 +57,7 @@ export class PurchaseItemsService {
 			await this.purchaseItemsRepository.save(purchaseItem)
 
 			purchaseItemWithStock.purchaseItemDto = purchaseItem
-			await this.productsService.updateProductStockAndProduct(
+			await this.productsService.updateProductStockAndProductFromPurchase(
 				purchaseItemWithStock,
 				purchase,
 				EntityAction.Create,
@@ -112,17 +112,18 @@ export class PurchaseItemsService {
 			const promises = []
 
 			purchaseItems.forEach(purchaseItem => {
-				const promise = this.productsService.updateProductStockAndProduct(
-					{
-						client,
-						purchaseItemDto: { ...purchaseItem },
-						productStock: purchaseItem.productStock,
-						product: purchaseItem.productStock.product,
+				const promise =
+					this.productsService.updateProductStockAndProductFromPurchase(
+						{
+							client,
+							purchaseItemDto: { ...purchaseItem },
+							productStock: purchaseItem.productStock,
+							product: purchaseItem.productStock.product,
+							purchase,
+						},
 						purchase,
-					},
-					purchase,
-					EntityAction.Delete,
-				)
+						EntityAction.Delete,
+					)
 				promises.push(promise)
 			})
 

@@ -9,6 +9,7 @@ import { VariantsModule } from 'src/variants/variants.module'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { ProductsModule } from 'src/products/products.module'
 import { SuppliersModule } from 'src/suppliers/suppliers.module'
+import { CustomersModule } from 'src/customers/customers.module'
 
 @Module({
 	providers: [SeedService],
@@ -21,6 +22,7 @@ import { SuppliersModule } from 'src/suppliers/suppliers.module'
 		VariantsModule,
 		ProductsModule,
 		SuppliersModule,
+		CustomersModule,
 	],
 	controllers: [SeedController],
 })

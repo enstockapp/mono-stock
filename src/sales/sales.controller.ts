@@ -19,34 +19,34 @@ import {
 	SortingDto,
 } from 'src/common'
 
-import { PurchasesService } from './services/purchases.service'
-import { CreatePurchaseDto, PurchasesFilteringDto } from './dtos'
-import { Purchase } from './entities'
-import { ValidSortingValuesPurchases } from './constants'
+import { SalesService } from './services/sales.service'
+import { CreateSaleDto, SalesFilteringDto } from './dtos'
+import { Sale } from './entities'
+import { ValidSortingValuesSales } from './constants'
 
-@Controller('purchases')
-export class PurchasesController {
-	constructor(private readonly purchasesService: PurchasesService) {}
+@Controller('sales')
+export class SalesController {
+	constructor(private readonly salesService: SalesService) {}
 
 	@Post()
 	@Auth(RoleEnum.superAdmin, RoleEnum.admin)
 	create(
-		@Body() createPurchaseDto: CreatePurchaseDto,
+		@Body() createSaleDto: CreateSaleDto,
 		@GetUser('client') client: Client,
-	): Promise<Purchase> {
-		return this.purchasesService.create(createPurchaseDto, client)
+	): Promise<Sale> {
+		return this.salesService.create(createSaleDto, client)
 	}
 
 	@Get()
 	@Auth()
-	@ApiSorting(ValidSortingValuesPurchases)
+	@ApiSorting(ValidSortingValuesSales)
 	findAll(
 		@Query() paginationDto: PaginationDto,
 		@Query() sortingDto: SortingDto,
-		@Query() filteringDto: PurchasesFilteringDto,
+		@Query() filteringDto: SalesFilteringDto,
 		@GetUser('client') client: Client,
 	): Promise<PaginatedResponse> {
-		return this.purchasesService.findAll(
+		return this.salesService.findAll(
 			paginationDto,
 			sortingDto,
 			filteringDto,
@@ -59,8 +59,8 @@ export class PurchasesController {
 	findOne(
 		@Param('id', ParseIntPipe) id: number,
 		@GetUser('client') client: Client,
-	): Promise<Purchase> {
-		return this.purchasesService.findOne(id, client)
+	): Promise<Sale> {
+		return this.salesService.findOne(id, client)
 	}
 
 	@Delete(':id')
@@ -68,7 +68,7 @@ export class PurchasesController {
 	remove(
 		@Param('id', ParseIntPipe) id: number,
 		@GetUser('client') client: Client,
-	): Promise<Purchase> {
-		return this.purchasesService.delete(id, client)
+	): Promise<Sale> {
+		return this.salesService.delete(id, client)
 	}
 }

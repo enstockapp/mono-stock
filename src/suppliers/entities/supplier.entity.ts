@@ -10,9 +10,8 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm'
-import { Contact } from 'src/common'
+import { Contact, IdentificationType } from 'src/common'
 import { Client } from 'src/client/entities/client.entity' //! Keep this import
-import { IdentificationType } from 'src/client'
 
 @Entity('suppliers')
 @Index(['name', 'client'], { unique: true })

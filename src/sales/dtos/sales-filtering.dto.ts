@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsEnum, IsOptional } from 'class-validator'
 import { Currency, DocumentType, FilteringDto } from 'src/common'
 
-export interface PurchasesFiltering extends FilteringDto {
+export interface SalesFiltering extends FilteringDto {
 	documentType?: DocumentType
 	currency?: Currency
 }
 
-export class PurchasesFilteringDto extends FilteringDto {
+export class SalesFilteringDto extends FilteringDto {
 	@ApiProperty({
 		description: `Filter all with specific documentType. Valid values: ${Object.values(DocumentType).join(', ')}`,
 		required: false,
@@ -25,10 +25,8 @@ export class PurchasesFilteringDto extends FilteringDto {
 	currency?: Currency
 }
 
-export const getPurchasesFiltering = (
-	purchasesFilteringDto: PurchasesFilteringDto,
-) => {
+export const getSalesFiltering = (salesFilteringDto: SalesFilteringDto) => {
 	return {
-		...purchasesFilteringDto,
+		...salesFilteringDto,
 	}
 }

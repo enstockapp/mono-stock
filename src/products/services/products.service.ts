@@ -33,6 +33,7 @@ import { ProductStocksService } from './product-stocks.service'
 import { ProductVariantsService } from './product-variants.service'
 import { ValidSortingValuesProducts } from '../constants'
 import { PurchaseItemDto } from 'src/purchases/dtos'
+import { SaleItemWithStock } from 'src/sales'
 
 @Injectable()
 export class ProductsService {
@@ -276,60 +277,6 @@ export class ProductsService {
 	}
 
 	/**
-	 * Update baseCost, averageCost and totalForAverageCost
-	 * @param {Purchase} purchase
-	 * @param {PurchaseItem} purchaseItem
-	 * @param {Product} product
-	 * @param {Client} client
-	 * @return {*}  {Promise<Product>}
-	 * @memberof ProductsService
-	 */
-	async updateCostFromPurchaseItem(
-		purchase: Purchase,
-		purchaseItem: PurchaseItem | PurchaseItemDto,
-		product: Product,
-		client: Client,
-		action: EntityAction.Create | EntityAction.Delete,
-	): Promise<Product> {
-		const { currency, currencyExchangeFrom, exchangeRate } = purchase
-		const { id, totalForAverageCost, averageCost } = product
-		const { updateProductBaseCost, quantity, amount } = purchaseItem
-		const { mainCurrency } = client
-
-		const cost = getAmountInMainCurrency(
-			mainCurrency,
-			currency,
-			currencyExchangeFrom,
-			exchangeRate,
-			amount,
-		)
-
-		// Create Product like
-		const productLike: DeepPartial<Product> = { client }
-
-		// calculate new values
-		const currentTotalCost = totalForAverageCost * averageCost
-		const amountToModifyTotalCost = quantity * cost
-
-		let newTotalForAverageCost = totalForAverageCost + quantity
-		let newAverageCost =
-			(currentTotalCost + amountToModifyTotalCost) / newTotalForAverageCost
-
-		// If it's a delete, substract
-		if (action === EntityAction.Delete) {
-			newTotalForAverageCost = totalForAverageCost - quantity
-			newAverageCost =
-				(currentTotalCost - amountToModifyTotalCost) / newTotalForAverageCost
-		}
-
-		if (updateProductBaseCost) productLike.baseCost = +cost.toFixed(2)
-		productLike.totalForAverageCost = newTotalForAverageCost
-		productLike.averageCost = +newAverageCost.toFixed(2)
-
-		return await this._update(id, productLike)
-	}
-
-	/**
 	 * Update base product data
 	 * @param {number} id
 	 * @param {UpdateProductDto} updateProductDto
@@ -418,11 +365,11 @@ export class ProductsService {
 	 * @param {(EntityAction.Create | EntityAction.Delete)} entityAction
 	 * @memberof ProductsService
 	 */
-	async updateProductStockAndProduct(
+	async updateProductStockAndProductFromPurchase(
 		purchaseItemWithStock: PurchaseItemWithStock,
 		purchase: Purchase,
 		entityAction: EntityAction.Create | EntityAction.Delete,
-	) {
+	): Promise<void> {
 		const { productStock, product, client, purchaseItemDto } =
 			purchaseItemWithStock
 
@@ -439,13 +386,86 @@ export class ProductsService {
 		)
 
 		// Update product: averageCost, totalForAverageCost, baseCost
-		await this.updateCostFromPurchaseItem(
+		await this._updateCostFromPurchaseItem(
 			purchase,
 			purchaseItemDto as PurchaseItemDto,
 			product,
 			client,
 			entityAction,
 		)
+	}
+
+	async updateProductStockAndProductFromSale(
+		saleItemWithStock: SaleItemWithStock,
+		entityAction: EntityAction.Create | EntityAction.Delete,
+	): Promise<void> {
+		const { productStock, saleItemDto } = saleItemWithStock
+
+		// Update productStocks: quantity
+		const variation =
+			entityAction === EntityAction.Create
+				? Variation.Decrement
+				: Variation.Increment
+
+		await this.productStocksService.updateQuantity(
+			productStock,
+			saleItemDto.quantity,
+			variation,
+		)
+	}
+
+	/**
+	 * Update baseCost, averageCost and totalForAverageCost
+	 * @param {Purchase} purchase
+	 * @param {PurchaseItem} purchaseItem
+	 * @param {Product} product
+	 * @param {Client} client
+	 * @return {*}  {Promise<Product>}
+	 * @memberof ProductsService
+	 */
+	private async _updateCostFromPurchaseItem(
+		purchase: Purchase,
+		purchaseItem: PurchaseItem | PurchaseItemDto,
+		product: Product,
+		client: Client,
+		action: EntityAction.Create | EntityAction.Delete,
+	): Promise<Product> {
+		const { currency, currencyExchangeFrom, exchangeRate } = purchase
+		const { id, totalForAverageCost, averageCost } = product
+		const { updateProductBaseCost, quantity, amount } = purchaseItem
+		const { mainCurrency } = client
+
+		const cost = getAmountInMainCurrency(
+			mainCurrency,
+			currency,
+			currencyExchangeFrom,
+			exchangeRate,
+			amount,
+		)
+
+		// Create Product like
+		const productLike: DeepPartial<Product> = { client }
+
+		// calculate new values
+		const currentTotalCost = totalForAverageCost * averageCost
+		const amountToModifyTotalCost = quantity * cost
+
+		let newTotalForAverageCost = totalForAverageCost + quantity
+		let newAverageCost =
+			(currentTotalCost + amountToModifyTotalCost) / newTotalForAverageCost
+
+		// If it's a delete, substract
+		if (action === EntityAction.Delete) {
+			newTotalForAverageCost = totalForAverageCost - quantity
+			newAverageCost =
+				(currentTotalCost - amountToModifyTotalCost) / newTotalForAverageCost
+		}
+
+		if (updateProductBaseCost) productLike.baseCost = +cost.toFixed(2)
+		productLike.totalForAverageCost = newTotalForAverageCost
+		productLike.averageCost = +newAverageCost.toFixed(2)
+
+		return await this._update(id, productLike)
 	}
 
 	/**
