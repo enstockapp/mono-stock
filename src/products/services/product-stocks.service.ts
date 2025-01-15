@@ -138,7 +138,7 @@ export class ProductStocksService {
 	 * @return {*}  {Promise<any>}
 	 * @memberof ProductStocksService
 	 */
-	async findAllByIds(ids: number[]): Promise<ProductStock[]> {
+	private async _findAllByIds(ids: number[]): Promise<ProductStock[]> {
 		const productStocks = await this.productStocksRepository.find({
 			where: { id: In(ids) },
 			relations: {
@@ -153,6 +153,31 @@ export class ProductStocksService {
 				`Some ProductStock ids were not found. NotFoundCount: (${ids.length - productStocks.length})`,
 			)
 		return productStocks
+	}
+
+	/**
+	 * Find one ProductStock by id and client
+	 * @param {number} id
+	 * @param {Client} client
+	 * @return {*}  {Promise<ProductStock>}
+	 * @memberof ProductStocksService
+	 */
+	async findOneById(id: number, client: Client): Promise<ProductStock> {
+		const queryBuilder = this.productStocksRepository.createQueryBuilder(
+			this.queryBuilderAlias,
+		)
+
+		const productStock = await queryBuilder
+			.leftJoinAndSelect(`${this.queryBuilderAlias}.product`, 'product')
+			.where(`${this.queryBuilderAlias}.id = :id`, { id })
+			.andWhere(`product.client_id = :clientId`, { clientId: client.id })
+			.getOne()
+
+		if (productStock) return productStock
+
+		this.errorAdapter.throwBadRequestNotFoundError(
+			`ProductStock with id '${id}' not found`,
+		)
 	}
 
 	/**
@@ -226,7 +251,7 @@ export class ProductStocksService {
 		ids: number[],
 		client: Client,
 	): Promise<ProductStock[]> {
-		const productStocks = await this.findAllByIds(ids)
+		const productStocks = await this._findAllByIds(ids)
 		const clientId = client.id
 		const productStocksFiltered = productStocks.filter(
 			ps => ps.product.client.id !== clientId,

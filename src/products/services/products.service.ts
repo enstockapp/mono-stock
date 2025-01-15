@@ -1,4 +1,10 @@
-import { DataSource, DeepPartial, ILike, Repository } from 'typeorm'
+import {
+	DataSource,
+	DeepPartial,
+	FindOptionsWhere,
+	ILike,
+	Repository,
+} from 'typeorm'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
@@ -208,24 +214,28 @@ export class ProductsService {
 		const { sort, order } = getSorting(sortingDto, ValidSortingValuesProducts)
 		const { searchTerm = '', status } = getProductsFiltering(filteringDto)
 
-		const defaultWhere = { client: { id: client.id }, status }
+		const defaultWhere: FindOptionsWhere<Product> = {
+			client: { id: client.id },
+			status,
+		}
 
-		const where = !searchTerm
-			? defaultWhere
-			: [
-					{
-						...defaultWhere,
-						name: ILike(`%${searchTerm}%`),
-					},
-					{
-						...defaultWhere,
-						reference: ILike(`%${searchTerm}%`),
-					},
-					{
-						...defaultWhere,
-						description: ILike(`%${searchTerm}%`),
-					},
-				]
+		const where: FindOptionsWhere<Product> | FindOptionsWhere<Product>[] =
+			!searchTerm
+				? defaultWhere
+				: [
+						{
+							...defaultWhere,
+							name: ILike(`%${searchTerm}%`),
+						},
+						{
+							...defaultWhere,
+							reference: ILike(`%${searchTerm}%`),
+						},
+						{
+							...defaultWhere,
+							description: ILike(`%${searchTerm}%`),
+						},
+					]
 
 		const [products, total] = await this.productsRepository.findAndCount({
 			where,

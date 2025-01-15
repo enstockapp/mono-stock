@@ -26,16 +26,13 @@ import {
 	UpdateProductDto,
 	ProductsFilteringDto,
 } from './dto'
-import { ProductsService, ProductStocksService } from './services'
+import { ProductsService } from './services'
 import { Product } from './entities'
 import { ValidSortingValuesProducts } from './constants'
 
 @Controller('products')
 export class ProductsController {
-	constructor(
-		private readonly productsService: ProductsService,
-		private readonly productStocksService: ProductStocksService,
-	) {}
+	constructor(private readonly productsService: ProductsService) {}
 
 	/**
 	 * Create a product without variants
