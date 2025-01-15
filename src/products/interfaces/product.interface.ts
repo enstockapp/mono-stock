@@ -1,4 +1,6 @@
 import { MeasureUnitType } from 'src/common'
+import { ProductStockExtended } from './product-stock.interface'
+import { Product } from '../entities'
 
 /**
  *
@@ -16,4 +18,8 @@ export interface IProduct {
 	price: number
 	metadata?: Record<string, any>
 	categoryId?: number
+}
+
+export interface ProductExtended extends Product {
+	stock: ProductStockExtended
 }

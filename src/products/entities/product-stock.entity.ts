@@ -40,7 +40,7 @@ export class ProductStock {
 	quantity: number
 
 	@Column('jsonb', { default: '{}' })
-	metadata: Record<string, any>
+	metadata: Record<string | number, any>
 
 	/*? Status id defined in parent
 	 	ProductStockType.Unique => Product.status

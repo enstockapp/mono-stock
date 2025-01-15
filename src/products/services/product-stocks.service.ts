@@ -9,6 +9,7 @@ import { ItemVariantDto, StockDto } from '../dto'
 import { Product, ProductStock } from '../entities'
 import { ProductStockType } from '../enums'
 import { Client } from 'src/client'
+import { ItemVariantDtoExtended, ProductStockExtended } from '../interfaces'
 
 @Injectable()
 export class ProductStocksService {
@@ -67,10 +68,16 @@ export class ProductStocksService {
 					uniqueVariants as Variant[],
 				)
 
-			const allCombinationsItemVariants: ItemVariantDto[] =
+			const allCombinationsItemVariants: ItemVariantDtoExtended[] =
 				allCombinationsArr.map(combination => {
+					const metadata: Record<string | number, any> = {}
 					const currentOptionCombination: number[] = combination
-						.map(variantOption => variantOption.id)
+						.map(variantOption => {
+							// Generate Metadata and return only id
+							const { id, name } = variantOption
+							metadata[id] = name
+							return id
+						})
 						.toSorted((a, b) => a - b)
 
 					const currentOptionCombinationStr =
@@ -82,7 +89,9 @@ export class ProductStocksService {
 							currentOptionCombinationStr,
 					)
 
-					if (currentItemVariant.length > 0) return currentItemVariant[0]
+					if (currentItemVariant.length > 0) {
+						return { ...currentItemVariant[0], metadata }
+					}
 
 					return {
 						optionCombination: currentOptionCombination,
@@ -90,12 +99,13 @@ export class ProductStocksService {
 							initialQuantity: 0,
 							status: Status.Inactive,
 						},
+						metadata,
 					}
 				})
 
 			const promises = []
-			allCombinationsItemVariants.forEach(itemVariant =>
-				promises.push(this.createWithVariant(product, itemVariant)),
+			allCombinationsItemVariants.forEach(itemVariantWithName =>
+				promises.push(this._createWithVariant(product, itemVariantWithName)),
 			)
 			return await Promise.all(promises)
 		} catch (error) {
@@ -105,16 +115,18 @@ export class ProductStocksService {
 
 	/**
 	 * Create ProductStock with variant
+	 * @private
 	 * @param {Product} product
 	 * @param {ItemVariantDto} itemsVariant
 	 * @return {*}  {Promise<any>}
 	 * @memberof ProductStocksService
 	 */
-	async createWithVariant(
+	private async _createWithVariant(
 		product: Product,
-		itemsVariant: ItemVariantDto,
-	): Promise<any> {
-		const { optionCombination, stock } = itemsVariant
+		itemsVariant: ItemVariantDtoExtended,
+	): Promise<ProductStockExtended> {
+		const { optionCombination, stock, metadata } = itemsVariant
+
 		try {
 			const productStock = this.productStocksRepository.create({
 				...stock,
@@ -122,10 +134,11 @@ export class ProductStocksService {
 				type: ProductStockType.Child,
 				quantity: stock.initialQuantity,
 				optionCombination,
+				metadata,
 			})
 
 			await this.productStocksRepository.save(productStock)
-			return productStock
+			return this.getProductStockExtended(productStock, product)
 		} catch (error) {
 			this.handleDBError(error)
 		}
@@ -263,6 +276,45 @@ export class ProductStocksService {
 			)
 
 		return productStocks
+	}
+
+	/**
+	 * Get ProductStockExtended from ProductStock and Product
+	 * @param {ProductStock} productStock
+	 * @param {Product} product
+	 * @return {*}  {ProductStockExtended}
+	 * @memberof ProductStocksService
+	 */
+	getProductStockExtended(
+		productStock: ProductStock,
+		product: Product,
+	): ProductStockExtended {
+		const { metadata, optionCombination } = productStock
+		const nameSuffix = this.getNameSufixByMetadata(metadata, optionCombination)
+		return {
+			...productStock,
+			product,
+			productId: product.id,
+			nameSuffix,
+			fullName: product.name + nameSuffix,
+		}
+	}
+
+	/**
+	 * Get name suffix with options names by metadata and optionComination
+	 * @param {(Record<string | number, any>)} metadata
+	 * @param {number[]} optionCombination
+	 * @return {*}  {string}
+	 * @memberof ProductStocksService
+	 */
+	getNameSufixByMetadata(
+		metadata: Record<string | number, any>,
+		optionCombination: number[],
+	): string {
+		if (!optionCombination) return ''
+		let nameSufix = ''
+		for (const option of optionCombination) nameSufix += '| ' + metadata[option]
+		return nameSufix
 	}
 
 	/**

@@ -329,7 +329,7 @@ export class VariantsService {
 
 			//? Validate that the optionsIds can be together
 			const { optionsSummaries, keyOptionValueVariant } =
-				this.getAllOptionsFromVariants(variants)
+				this._getAllOptionsFromVariants(variants)
 
 			const allVariantsIds = optionsSummaries.map(option => option.variantId)
 			const uniqueVariantsIds = Array.from(new Set(allVariantsIds))
@@ -383,7 +383,7 @@ export class VariantsService {
 	 * @return {*}
 	 * @memberof VariantsService
 	 */
-	getAllPossibleOptionCombinations(variants: Variant[]) {
+	getAllPossibleOptionCombinations(variants: Variant[]): VariantOption[][] {
 		if (variants.length === 0) return []
 
 		// Helper para generar combinaciones recursivamente
@@ -405,14 +405,27 @@ export class VariantsService {
 		return generateCombinations(0)
 	}
 
-	getAllOptionsFromVariants(variants: Variant[] | VariantSummary[]) {
+	/**
+	 * Get all options from a Variants array
+	 * @private
+	 * @param {(Variant[] | VariantSummary[])} variants
+	 * @return {*}  {{
+	 * 		optionsSummaries: VariantOptionSummary[]
+	 * 		keyOptionValueVariant: { [key: number]: number }
+	 * 	}}
+	 * @memberof VariantsService
+	 */
+	private _getAllOptionsFromVariants(variants: Variant[] | VariantSummary[]): {
+		optionsSummaries: VariantOptionSummary[]
+		keyOptionValueVariant: { [key: number]: number }
+	} {
 		const optionsSummaries: VariantOptionSummary[] = []
 		variants.forEach(variant =>
 			optionsSummaries.push(...variant.variantOptions),
 		)
 
 		// Create object for simple validation. key = optionId / value = variantId
-		const keyOptionValueVariant = {}
+		const keyOptionValueVariant: { [key: number]: number } = {}
 		for (const optionSummary of optionsSummaries) {
 			keyOptionValueVariant[optionSummary.id] = optionSummary.variantId
 		}

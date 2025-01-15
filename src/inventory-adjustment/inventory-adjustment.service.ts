@@ -23,6 +23,7 @@ import {
 import { AdjustmentType } from './enums'
 import { ValidSortingValuesInventoryAdjustment } from './constants'
 import { InventoryAdjustment } from './entities'
+import { InventoryAdjustmentExtended } from './interfaces'
 
 @Injectable()
 export class InventoryAdjustmentService {
@@ -126,7 +127,20 @@ export class InventoryAdjustmentService {
 				order: { [sort]: order },
 			})
 
-		return { page, size, total, items: inventoryAdjustments }
+		const inventoryAdjustmentExtended: InventoryAdjustmentExtended[] =
+			inventoryAdjustments.map(inventoryAdjustments => {
+				const { productStock } = inventoryAdjustments
+				const { product } = productStock
+				return {
+					...inventoryAdjustments,
+					productStock: this.productStocksService.getProductStockExtended(
+						productStock,
+						product,
+					),
+				}
+			})
+
+		return { page, size, total, items: inventoryAdjustmentExtended }
 	}
 
 	/**

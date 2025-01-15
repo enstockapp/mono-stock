@@ -52,7 +52,7 @@ export class InventoryAdjustment {
 
 	productStockId?: number
 
-	@ManyToOne(() => User, { nullable: false })
+	@ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
 	@JoinColumn({ name: 'user_id' })
 	user: User
 

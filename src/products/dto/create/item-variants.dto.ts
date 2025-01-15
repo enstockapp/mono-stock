@@ -2,11 +2,11 @@ import { Type } from 'class-transformer'
 import { ArrayNotEmpty, IsInt, ValidateNested } from 'class-validator'
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
-import { ItemsVariants } from '../../interfaces'
+import { ItemVariant } from '../../interfaces'
 import { StockDto } from './stock.dto'
 
 @ApiSchema({ name: 'ItemVariantDto' })
-export class ItemVariantDto implements ItemsVariants {
+export class ItemVariantDto implements ItemVariant {
 	@ApiProperty({
 		description: 'Array of variant_options.id',
 	})

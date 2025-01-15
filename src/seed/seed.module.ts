@@ -10,6 +10,7 @@ import { CategoriesModule } from 'src/categories/categories.module'
 import { ProductsModule } from 'src/products/products.module'
 import { SuppliersModule } from 'src/suppliers/suppliers.module'
 import { CustomersModule } from 'src/customers/customers.module'
+import { InventoryAdjustmentModule } from 'src/inventory-adjustment/inventory-adjustment.module'
 
 @Module({
 	providers: [SeedService],
@@ -23,6 +24,7 @@ import { CustomersModule } from 'src/customers/customers.module'
 		ProductsModule,
 		SuppliersModule,
 		CustomersModule,
+		InventoryAdjustmentModule,
 	],
 	controllers: [SeedController],
 })

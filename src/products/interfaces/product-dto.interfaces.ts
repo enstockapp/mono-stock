@@ -1,5 +1,6 @@
 import { Status } from 'src/common'
 import { IProduct } from './product.interface'
+import { ItemVariantDto } from '../dto'
 
 export interface Stock {
 	initialQuantity?: number
@@ -20,11 +21,14 @@ export interface ProductUnique {
 export interface ProductWithVariants {
 	product: IProduct
 	// variantsIds: number[]
-	itemsVariants: ItemsVariants[]
+	itemsVariants: ItemVariant[]
 }
 
-export interface ItemsVariants {
+export interface ItemVariant {
 	optionCombination: number[]
 	stock?: Stock
-	status?: Status
+}
+
+export interface ItemVariantDtoExtended extends ItemVariantDto {
+	metadata: Record<string | number, any>
 }
